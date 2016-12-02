@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Security.Permissions;
 using System.Security.Principal;
 using System.Threading;
 
@@ -18,7 +19,7 @@ namespace GenericPrincipal
             var identity = new GenericIdentity("bob");
 
             // fetch roles
-            var roles = new string[] { "Development", "Marketing" };
+            var roles = new[] { "Development", "Marketing" };
 
             var principal = new System.Security.Principal.GenericPrincipal(identity, roles);
 
@@ -32,6 +33,28 @@ namespace GenericPrincipal
             Debug.WriteLine(p.Identity.Name);
 
             Debug.WriteLine(p.IsInRole("Development"));
+
+
+            if (p.IsInRole("Marketing"))
+            {
+                // do something
+            }
+            else
+            {
+                // access denied
+            }
+
+            // throws exception
+            new PrincipalPermission(null, "Development").Demand();
+
+            DoDevWork();
+        }
+
+        [PrincipalPermission(SecurityAction.Demand, Role = "Development")]
+        [PrincipalPermission(SecurityAction.Demand, Role = "SomeOther")]
+        private static void DoDevWork()
+        {
+            Debug.WriteLine("You're a dev!");
         }
 
     }
